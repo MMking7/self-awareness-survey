@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>홈 화면 와이어프레임</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
+            background-color: #FDF8F4;
+            padding: 0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            font-family: 'Pretendard', 'Noto Sans', sans-serif;
+        }
+        .phone-container {
+            width: 360px;
+            height: 720px;
+            border: 12px solid #333;
+            border-radius: 32px;
+            overflow: hidden;
+            background-color: #FDF8F4;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .status-bar {
+            height: 24px;
+            background-color: #FDF8F4;
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 16px;
+            font-size: 12px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: rgba(253, 248, 244, 0.9);
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .header-icons {
+            display: flex;
+            gap: 16px;
+        }
+        .daily-quote {
+            margin: 16px;
+            background-color: #E8E2F7;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .quote-text {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .quote-subtext {
+            font-size: 12px;
+            color: #666;
+        }
+        .section-title {
+            margin: 0 16px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+        .activities-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 8px 16px;
+            gap: 12px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        .activity-card {
+            min-width: 160px;
+            background-color: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            scroll-snap-align: start;
+        }
+        .activity-emoji {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .activity-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .activity-rating {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .book-button {
+            background-color: #D9F0E6;
+            color: #333;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .joy-type-card {
+            margin: 16px;
+            background-color: #D9F0E6;
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .joy-type-content {
+            display: flex;
+            flex-direction: column;
+        }
+        .joy-type-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .joy-type-value {
+            font-weight: 500;
+        }
+        .joy-type-value span {
+            font-weight: 600;
+            color: #8C6CC3;
+        }
+        .graph-icon {
+            font-size: 20px;
+        }
+        .daily-question {
+            margin: 16px;
+            background-color: #FFF8E1;
+            padding: 16px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .question-emoji {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        .question-content {
+            flex: 1;
+        }
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .question-hint {
+            font-size: 12px;
+            color: #666;
+        }
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            background-color: white;
+            border-top: 1px solid #eee;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+        }
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        .nav-text {
+            color: #666;
+        }
+        .active {
+            color: #8C6CC3;
+        }
+        .active .nav-text {
+            color: #8C6CC3;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="status-bar">
+            <span>10:30</span>
+            <div>
+                <span>📶</span>
+                <span>🔋 85%</span>
+            </div>
+        </div>
+        
+        <!-- 헤더 -->
+        <div class="header">
+            <div class="logo">Home</div>
+            <div class="header-icons">
+                <div>🔄</div>
+                <div>⚙️</div>
+            </div>
+        </div>
+        
+        <!-- 오늘의 추천 문구 배너 -->
+        <div class="daily-quote">
+            <div class="quote-text">💡 오늘은 새로운 도전이 필요한 날이에요!</div>
+            <div class="quote-subtext">최근 회고에서 '짜릿한 활동'을 선호했다고 응답</div>
+        </div>
+        
+        <!-- 추천 활동 섹션 -->
+        <div class="section-title">추천 활동</div>
+        <div class="activities-container hide-scrollbar">
+            <div class="activity-card">
+                <div class="activity-emoji">🧗</div>
+                <div class="activity-name">도심 속 클라이밍</div>
+                <div class="activity-rating">⭐ 4.8</div>
+                <button class="book-button">예약하기</button>
+            </div>
+            <div class="activity-card">
+                <div class="activity-emoji">🧘</div>
+                <div class="activity-name">숲속 명상 클래스</div>
+                <div class="activity-rating">⭐ 4.6</div>
+                <button class="book-button">예약하기</button>
+            </div>
+            <div class="activity-card">
+                <div class="activity-emoji">🎨</div>
+                <div class="activity-name">추상화 그리기</div>
+                <div class="activity-rating">⭐ 4.5</div>
+                <button class="book-button">예약하기</button>
+            </div>
+        </div>
+        
+        <!-- 즐거움 유형 요약 카드 -->
+        <div class="joy-type-card">
+            <div class="joy-type-content">
+                <div class="joy-type-title">현재 즐거움 유형</div>
+                <div class="joy-type-value"><span>감각형</span> + <span>몰입형</span></div>
+            </div>
+            <div class="graph-icon">📈</div>
+        </div>
+        
+        <!-- 오늘의 질문 배너 -->
+        <div class="daily-question">
+            <div class="question-emoji">💬</div>
+            <div class="question-content">
+                <div class="question-text">오늘 특별히 기억에 남는 일이 있었나요?</div>
+                <div class="question-hint">→ 클릭 시 채팅 탭으로 이동</div>
+            </div>
+        </div>
+        
+        <!-- 하단 네비게이션 바 -->
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-text">홈</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">🗓️</div>
+                <div class="nav-text">일정</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">💬</div>
+                <div class="nav-text">채팅</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">👤</div>
+                <div class="nav-text">프로필</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
