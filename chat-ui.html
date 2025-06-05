@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>채팅 화면 UI 와이어프레임</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Noto Sans KR', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      background-color: #FDF8F4;
+      color: #333;
+      font-size: 16px;
+      height: 100vh;
+      width: 100%;
+      position: fixed;
+      overflow: hidden;
+    }
+    
+    .iphone-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 390px; /* iPhone 13/14 width */
+      margin: 0 auto;
+      background-color: #FDF8F4;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    /* 상태 표시줄 (Status Bar) */
+    .status-bar {
+      background-color: #FDF8F4;
+      height: 44px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    
+    .status-left {
+      display: flex;
+      align-items: center;
+    }
+    
+    .status-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .status-right {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .battery-icon {
+      width: 25px;
+      height: 12px;
+      border: 1px solid #333;
+      border-radius: 3px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    
+    .battery-icon::after {
+      content: '';
+      width: 2px;
+      height: 4px;
+      background: #333;
+      position: absolute;
+      right: -4px;
+      border-radius: 0 2px 2px 0;
+    }
+    
+    .battery-level {
+      height: 8px;
+      width: 70%;
+      background: #333;
+      margin-left: 2px;
+      border-radius: 1px;
+    }
+    
+    /* 1️⃣ 헤더 영역 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background-color: rgba(255, 255, 255, 0.3);
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .header-title {
+      font-size: 20px;
+      font-weight: bold;
+    }
+    
+    .header-icons {
+      display: flex;
+      gap: 16px;
+    }
+    
+    .header-icon {
+      font-size: 18px;
+      color: #444;
+      cursor: pointer;
+    }
+    
+    /* 채팅 영역 */
+    .chat-container {
+      flex-grow: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* 2️⃣ 챗봇 말풍선 */
+    .chat-bubble {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 16px;
+      line-height: 1.4;
+      position: relative;
+    }
+    
+    .bot-bubble {
+      align-self: flex-start;
+      background-color: #E8E2F7;
+      font-weight: 500;
+      border-bottom-left-radius: 4px;
+      margin-left: 4px;
+    }
+    
+    /* 유저 말풍선 */
+    .user-bubble {
+      align-self: flex-end;
+      background-color: white;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      border-bottom-right-radius: 4px;
+      margin-right: 4px;
+    }
+    
+    /* 태그 영역 */
+    .tags-container {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    
+    .tag {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .tag.happy {
+      background-color: #FFF5CC;
+    }
+    
+    .tag.challenge {
+      background-color: #D9F0E6;
+    }
+    
+    .tag.neutral {
+      background-color: #E8E2F7;
+    }
+    
+    /* 3️⃣ 입력 영역 */
+    .input-container {
+      padding: 12px 16px;
+      border-top: 1px solid #eee;
+      background-color: #fff;
+    }
+    
+    .text-input-wrap {
+      position: relative;
+      margin-bottom: 12px;
+    }
+    
+    .text-input {
+      width: 100%;
+      padding: 12px 40px 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      font-size: 16px;
+      outline: none;
+      background-color: #f9f9f9;
+    }
+    
+    .send-button {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background-color: #E8E2F7;
+      border: none;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .options-container {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .options-container::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    
+    .option-button {
+      padding: 8px 16px;
+      border-radius: 24px;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .option-happy {
+      background-color: #FFF5CC;
+    }
+    
+    .option-challenge {
+      background-color: #D9F0E6;
+    }
+    
+    .option-neutral {
+      background-color: #E8E2F7;
+    }
+    
+    /* 5️⃣ 히스토리 탭 */
+    .history-tab {
+      border-top: 1px solid #eee;
+      background-color: white;
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      z-index: 100;
+    }
+    
+    .history-tab.active {
+      max-height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .history-header {
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed #ddd;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .date-item {
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f5f5f5;
+      color: #555;
+      font-size: 13px;
+    }
+    
+    .cloud-icon {
+      color: #888;
+      cursor: pointer;
+    }
+    
+    /* 홈 표시줄 (Home Indicator) */
+    .home-indicator {
+      height: 34px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #fff;
+    }
+    
+    .indicator {
+      width: 134px;
+      height: 5px;
+      background-color: #000;
+      border-radius: 100px;
+      opacity: 0.3;
+    }
+    
+    /* 다크 모드 토글 추가 */
+    .dark-toggle {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      z-index: 100;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #333;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+    
+    /* 애플 스타일 하단 시트 오버레이 */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.4);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    /* 모바일 친화적인 스타일 조정 */
+    @media (max-width: 390px) {
+      .chat-bubble {
+        max-width: 85%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="iphone-container">
+    <!-- 상태 표시줄 삭제됨 -->
+    <!-- 1️⃣ 헤더 영역 -->
+    <div class="header">
+      <div class="header-title">Chat</div>
+      <div class="header-icons">
+        <div class="header-icon" id="historyToggle">
+          <i class="fas fa-history"></i>
+        </div>
+        <div class="header-icon">
+          <i class="fas fa-cog"></i>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 채팅 영역 -->
+    <div class="chat-container">
+      <!-- 챗봇 말풍선 1 -->
+      <div class="chat-bubble bot-bubble">
+        <span>💬 오늘 특별히 기억에 남는 일이 있었나요?</span>
+      </div>
+      
+      <!-- 유저 말풍선 1 -->
+      <div class="chat-bubble user-bubble">
+        <p>오늘 오랜만에 친구를 만나서 즐거운 시간을 보냈어요. 같이 걸으면서 이야기도 많이 했고 맛있는 음식도 먹었습니다.</p>
+        
+        <!-- 4️⃣ 자동 태깅 영역 -->
+        <div class="tags-container">
+          <div class="tag happy">
+            <span>😄</span>
+            <span>#즐거움</span>
+          </div>
+          <div class="tag happy">
+            <span>👫</span>
+            <span>#만남</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 챗봇 말풍선 2 -->
+      <div class="chat-bubble bot-bubble">
+        <span>🤔 최근 했던 활동 중 가장 재미있었던 건 무엇인가요?</span>
+      </div>
+    </div>
+    
+    <!-- 오버레이 -->
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- 5️⃣ 히스토리 탭 (기본은 접힌 상태) -->
+    <div class="history-tab" id="historyTab">
+      <div class="history-header">
+        <span>대화 히스토리</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <div class="date-item">
+        <span>2025년 5월 18일</span>
+        <span class="cloud-icon"><i class="fas fa-cloud"></i></span>
+      </div>
+      <div class="date-item">
+        <span>2025년 5월 15일</span>
+        <span class="cloud-icon"><i class="fas fa-cloud"></i></span>
+      </div>
+      <div class="date-item">
+        <span>2025년 5월 10일</span>
+        <span class="cloud-icon"><i class="fas fa-cloud"></i></span>
+      </div>
+    </div>
+    
+    <!-- 3️⃣ 유저 입력 영역 -->
+    <div class="input-container">
+      <div class="text-input-wrap">
+        <input type="text" class="text-input" placeholder="답변을 입력하세요...">
+        <button class="send-button">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+      <div class="options-container">
+        <button class="option-button option-happy">
+          <span>😆</span>
+          <span>즐거웠어요</span>
+        </button>
+        <button class="option-button option-challenge">
+          <span>🤯</span>
+          <span>도전이었어요</span>
+        </button>
+        <button class="option-button option-neutral">
+          <span>😐</span>
+          <span>그냥 그랬어요</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 홈 표시줄 -->
+    <div class="home-indicator">
+      <div class="indicator"></div>
+    </div>
+  </div>
+  
+  <!-- 다크 모드 토글 버튼 (선택적) -->
+  <div class="dark-toggle">
+    <i class="fas fa-moon"></i>
+  </div>
+
+  <script>
+    // 히스토리 탭 토글 기능
+    const historyToggle = document.getElementById('historyToggle');
+    const historyTab = document.getElementById('historyTab');
+    const overlay = document.getElementById('overlay');
+    const chatContainer = document.querySelector('.chat-container');
+    const optionButtons = document.querySelectorAll('.option-button');
+    const textInput = document.querySelector('.text-input');
+    const sendButton = document.querySelector('.send-button');
+
+    historyToggle.addEventListener('click', () => {
+      historyTab.classList.toggle('active');
+      overlay.classList.toggle('active');
+    });
+
+    overlay.addEventListener('click', () => {
+      historyTab.classList.remove('active');
+      overlay.classList.remove('active');
+    });
+
+    // 선택지 버튼 클릭 이벤트
+    optionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        textInput.value = button.textContent.trim();
+        textInput.focus();
+      });
+    });
+
+    // 메시지 전송 함수
+    function sendMessage() {
+      if (textInput.value.trim() !== '') {
+        // 유저 말풍선 생성
+        const userBubble = document.createElement('div');
+        userBubble.className = 'chat-bubble user-bubble';
+        userBubble.innerHTML = `<p>${textInput.value}</p>`;
+        chatContainer.appendChild(userBubble);
+
+        // 입력창 비우기
+        textInput.value = '';
+
+        // 스크롤을 맨 아래로 이동
+        setTimeout(() => {
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }, 10);
+      }
+    }
+
+    // 전송 버튼 이벤트
+    sendButton.addEventListener('click', sendMessage);
+
+    // 엔터 키 이벤트 처리
+    textInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter' && textInput.value.trim() !== '') {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>

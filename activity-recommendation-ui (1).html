@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>활동 추천</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #F2F2F7; /* iOS 시스템 배경색 */
+            color: #333;
+            font-size: 16px;
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-top: env(safe-area-inset-top);
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 80px; /* 탭바 높이만큼 추가 */
+        }
+        
+        /* 1. 상단 바 영역 - iOS 스타일 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: rgba(242, 242, 247, 0.92); /* iOS 스타일 반투명 배경 */
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid #E5E5EA; /* iOS 구분선 */
+        }
+        
+        .top-bar h1 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .top-bar .refresh-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+            color: #007AFF; /* iOS 파란색 */
+            position: absolute;
+            right: 16px;
+        }
+        
+        /* 탭 영역 - iOS 세그먼트 컨트롤 스타일 */
+        .tabs {
+            display: flex;
+            margin: 16px;
+            background-color: #E5E5EA;
+            border-radius: 8px;
+            padding: 2px;
+            position: relative;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 8px 0;
+            font-size: 13px;
+            font-weight: 500;
+            color: #8E8E93;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .tab.active {
+            color: #000;
+            font-weight: 600;
+        }
+        
+        .tab-indicator {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: calc(50% - 4px);
+            height: calc(100% - 4px);
+            background-color: #FFFFFF;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+        
+        /* 2. 추천 활동 카드 리스트 영역 - iOS 카드 스타일 */
+        .activity-list {
+            padding: 0 16px 16px;
+        }
+        
+        .activity-card {
+            background-color: white;
+            border-radius: 13px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        
+        .activity-card-image {
+            height: 160px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .activity-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .activity-emoji {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: rgba(255,255,255,0.9);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .activity-card-content {
+            padding: 12px 16px;
+        }
+        
+        .activity-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        
+        .activity-card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+        }
+        
+        .activity-card-rating {
+            display: flex;
+            align-items: center;
+            color: #FF9500; /* iOS 노란색 */
+            font-size: 14px;
+        }
+        
+        .activity-card-rating span {
+            color: #8E8E93; /* iOS 텍스트 보조색 */
+            margin-left: 4px;
+            font-size: 14px;
+        }
+        
+        .activity-card-desc {
+            color: #8E8E93;
+            margin-bottom: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .activity-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .activity-card-btn-group {
+            display: flex;
+        }
+        
+        .activity-card-btn {
+            margin-right: 8px;
+            background-color: #F2F2F7;
+            border: none;
+            border-radius: 15px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        
+        .activity-card-btn.liked {
+            background-color: #FFE5E5;
+            color: #FF3B30; /* iOS 빨간색 */
+        }
+        
+        .activity-card-btn.disliked {
+            background-color: #E5E5EA;
+            color: #8E8E93;
+        }
+        
+        .activity-card-btn i {
+            margin-right: 4px;
+            font-size: 13px;
+        }
+        
+        .book-btn {
+            background-color: #007AFF; /* iOS 파란색 */
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 6px 12px;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .book-btn i {
+            margin-right: 4px;
+            font-size: 13px;
+        }
+        
+        /* 3. 캘린더 뷰 - iOS 캘린더 스타일 */
+        .calendar-view {
+            padding: 0 16px 16px;
+            display: none;
+        }
+        
+        .calendar {
+            background-color: #fff;
+            border-radius: 13px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #E5E5EA;
+        }
+        
+        .calendar-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+        }
+        
+        .calendar-nav {
+            display: flex;
+        }
+        
+        .calendar-nav-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            margin-left: 8px;
+            cursor: pointer;
+            color: #007AFF;
+        }
+        
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background-color: #FFFFFF;
+            padding: 8px 0;
+        }
+        
+        .calendar-weekday {
+            text-align: center;
+            font-size: 12px;
+            color: #8E8E93;
+            font-weight: 500;
+        }
+        
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-gap: 2px;
+            padding: 4px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .calendar-day:hover {
+            background-color: #F2F2F7;
+        }
+        
+        .calendar-day.has-activity::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: #007AFF;
+        }
+        
+        .calendar-day.active {
+            background-color: #007AFF;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .calendar-day.today {
+            font-weight: 600;
+            color: #007AFF;
+        }
+        
+        /* 예정된 활동 리스트 - iOS 리스트 스타일 */
+        .scheduled-activities {
+            margin-top: 16px;
+            background-color: white;
+            border-radius: 13px;
+            padding: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        
+        .scheduled-activities-header {
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #000;
+            border-bottom: 1px solid #E5E5EA;
+        }
+        
+        .activity-list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #E5E5EA;
+        }
+        
+        .activity-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-list-item-active {
+            background-color: #F2F2F7;
+        }
+        
+        .activity-list-icon {
+            width: 36px;
+            height: 36px;
+            background-color: #F2F2F7;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+        
+        .activity-list-content {
+            flex: 1;
+        }
+        
+        .activity-list-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+        
+        .activity-list-time {
+            font-size: 13px;
+            color: #8E8E93;
+        }
+        
+        .activity-list-action {
+            background: none;
+            border: none;
+            color: #007AFF;
+            cursor: pointer;
+        }
+        
+        /* 4. 후기 입력 영역 - iOS 모달 스타일 */
+        .review-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 100;
+        }
+        
+        .review-form {
+            width: 100%;
+            background-color: #FFFFFF;
+            border-radius: 13px 13px 0 0;
+            padding: 20px 16px;
+            position: relative;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .review-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #8E8E93;
+        }
+        
+        .review-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .review-stars {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #FF9500; /* iOS 노란색 */
+        }
+        
+        .review-stars i {
+            margin: 0 4px;
+            cursor: pointer;
+        }
+        
+        .review-emotions {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .review-emotion {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            background-color: #F2F2F7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            margin: 0 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .review-emotion.selected {
+            border-color: #007AFF;
+            background-color: #E1F0FF;
+        }
+        
+        .review-input {
+            margin-bottom: 20px;
+        }
+        
+        .review-input textarea {
+            width: 100%;
+            height: 80px;
+            border: 1px solid #E5E5EA;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 15px;
+            resize: none;
+        }
+        
+        .review-submit {
+            width: 100%;
+            background-color: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 0;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* 5. iOS 하단 탭바 - 추가 */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            background-color: rgba(255,255,255,0.96);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid #E5E5EA;
+            padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+            z-index: 90;
+        }
+        
+        .tab-bar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #8E8E93;
+            text-decoration: none;
+            font-size: 10px;
+        }
+        
+        .tab-bar-item.active {
+            color: #007AFF;
+        }
+        
+        .tab-bar-icon {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+        
+        /* 상태 표시용 클래스 */
+        .is-visible {
+            display: flex !important;
+        }
+        
+        .is-hidden {
+            display: none !important;
+        }
+        
+        .review-input {
+            margin-bottom: 16px;
+        }
+        
+        .review-input textarea {
+            width: 100%;
+            height: 80px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 14pt;
+            resize: none;
+        }
+        
+        .review-submit {
+            width: 100%;
+            background-color: #6B4EFF;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 16pt;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .review-submit:hover {
+            background-color: #5A3EDF;
+        }
+        
+        .review-emotion-tag {
+            display: inline-block;
+            background-color: #E8E2F7;
+            color: #6B4EFF;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            font-size: 12pt;
+        }
+        
+        /* Show when active */
+        .is-visible {
+            display: flex !important;
+        }
+        
+        .is-hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 1. 상단 바 영역 -->
+        <div class="top-bar">
+            <h1>활동 추천</h1>
+            <button class="refresh-btn" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+        
+        <!-- 탭 영역 -->
+        <div class="tabs">
+            <div class="tab active" data-tab="activity-list">추천 리스트</div>
+            <div class="tab" data-tab="calendar-view">캘린더 보기</div>
+        </div>
+        
+        <!-- 2. 추천 활동 카드 리스트 영역 -->
+        <div class="activity-list" id="activityList">
+            <!-- 추천 활동 카드 1 -->
+            <div class="activity-card">
+                <div class="activity-card-image">
+                    <img src="/api/placeholder/480/320" alt="실내 암벽등반">
+                    <div class="activity-emoji">🧗‍♀️</div>
+                </div>
+                <div class="activity-card-content">
+                    <div class="activity-card-header">
+                        <h3 class="activity-card-title">실내 암벽등반</h3>
+                        <div class="activity-card-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.7</span>
+                        </div>
+                    </div>
+                    <p class="activity-card-desc">높이를 정복하는 짜릿한 도전! 초보자도 안전하게 즐길 수 있어요</p>
+                    <div class="activity-card-actions">
+                        <div class="activity-card-btn-group">
+                            <button class="activity-card-btn" onclick="toggleLike(this)">
+                                <i class="far fa-heart"></i> 좋아요
+                            </button>
+                            <button class="activity-card-btn" onclick="toggleDislike(this)">
+                                <i class="far fa-thumbs-down"></i> 싫어요
+                            </button>
+                        </div>
+                        <button class="book-btn" onclick="showReviewForm()">
+                            <i class="far fa-calendar-check"></i> 예약하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 추천 활동 카드 2 -->
+            <div class="activity-card">
+                <div class="activity-card-image">
+                    <img src="/api/placeholder/480/320" alt="도자기 클래스">
+                    <div class="activity-emoji">🎨</div>
+                </div>
+                <div class="activity-card-content">
+                    <div class="activity-card-header">
+                        <h3 class="activity-card-title">도자기 클래스</h3>
+                        <div class="activity-card-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.8</span>
+                        </div>
+                    </div>
+                    <p class="activity-card-desc">창의력을 발휘하여 나만의 작품을 만들어보세요</p>
+                    <div class="activity-card-actions">
+                        <div class="activity-card-btn-group">
+                            <button class="activity-card-btn" onclick="toggleLike(this)">
+                                <i class="far fa-heart"></i> 좋아요
+                            </button>
+                            <button class="activity-card-btn" onclick="toggleDislike(this)">
+                                <i class="far fa-thumbs-down"></i> 싫어요
+                            </button>
+                        </div>
+                        <button class="book-btn" onclick="showReviewForm()">
+                            <i class="far fa-calendar-check"></i> 예약하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 추천 활동 카드 3 -->
+            <div class="activity-card">
+                <div class="activity-card-image">
+                    <img src="/api/placeholder/480/320" alt="VR 게임 체험">
+                    <div class="activity-emoji">🎮</div>
+                </div>
+                <div class="activity-card-content">
+                    <div class="activity-card-header">
+                        <h3 class="activity-card-title">VR 게임 체험</h3>
+                        <div class="activity-card-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.5</span>
+                        </div>
+                    </div>
+                    <p class="activity-card-desc">가상현실 속에서 펼쳐지는 신나는 모험</p>
+                    <div class="activity-card-actions">
+                        <div class="activity-card-btn-group">
+                            <button class="activity-card-btn" onclick="toggleLike(this)">
+                                <i class="far fa-heart"></i> 좋아요
+                            </button>
+                            <button class="activity-card-btn" onclick="toggleDislike(this)">
+                                <i class="far fa-thumbs-down"></i> 싫어요
+                            </button>
+                        </div>
+                        <button class="book-btn" onclick="showReviewForm()">
+                            <i class="far fa-calendar-check"></i> 예약하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 추천 활동 카드 4 -->
+            <div class="activity-card">
+                <div class="activity-card-image">
+                    <img src="/api/placeholder/480/320" alt="실내 서핑">
+                    <div class="activity-emoji">🏄‍♂️</div>
+                </div>
+                <div class="activity-card-content">
+                    <div class="activity-card-header">
+                        <h3 class="activity-card-title">실내 서핑</h3>
+                        <div class="activity-card-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.6</span>
+                        </div>
+                    </div>
+                    <p class="activity-card-desc">바다 없이도 즐기는 서핑의 짜릿함</p>
+                    <div class="activity-card-actions">
+                        <div class="activity-card-btn-group">
+                            <button class="activity-card-btn" onclick="toggleLike(this)">
+                                <i class="far fa-heart"></i> 좋아요
+                            </button>
+                            <button class="activity-card-btn" onclick="toggleDislike(this)">
+                                <i class="far fa-thumbs-down"></i> 싫어요
+                            </button>
+                        </div>
+                        <button class="book-btn" onclick="showReviewForm()">
+                            <i class="far fa-calendar-check"></i> 예약하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 3. 캘린더 뷰 -->
+        <div class="calendar-view" id="calendarView">
+            <div class="calendar">
+                <div class="calendar-header">
+                    <div class="calendar-title">2025년 5월</div>
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="calendar-nav-btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">일</div>
+                    <div class="calendar-weekday">월</div>
+                    <div class="calendar-weekday">화</div>
+                    <div class="calendar-weekday">수</div>
+                    <div class="calendar-weekday">목</div>
+                    <div class="calendar-weekday">금</div>
+                    <div class="calendar-weekday">토</div>
+                </div>
+                <div class="calendar-days">
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day"></div>
+                    <div class="calendar-day">1</div>
+                    <div class="calendar-day">2</div>
+                    <div class="calendar-day">3</div>
+                    <div class="calendar-day">4</div>
+                    
+                    <div class="calendar-day">5</div>
+                    <div class="calendar-day">6</div>
+                    <div class="calendar-day">7</div>
+                    <div class="calendar-day">8</div>
+                    <div class="calendar-day">9</div>
+                    <div class="calendar-day">10</div>
+                    <div class="calendar-day">11</div>
+                    
+                    <div class="calendar-day">12</div>
+                    <div class="calendar-day">13</div>
+                    <div class="calendar-day">14</div>
+                    <div class="calendar-day">15</div>
+                    <div class="calendar-day">16</div>
+                    <div class="calendar-day">17</div>
+                    <div class="calendar-day">18</div>
+                    
+                    <div class="calendar-day has-activity">19</div>
+                    <div class="calendar-day today active">20</div>
+                    <div class="calendar-day has-activity">21</div>
+                    <div class="calendar-day">22</div>
+                    <div class="calendar-day">23</div>
+                    <div class="calendar-day">24</div>
+                    <div class="calendar-day">25</div>
+                    
+                    <div class="calendar-day">26</div>
+                    <div class="calendar-day">27</div>
+                    <div class="calendar-day">28</div>
+                    <div class="calendar-day">29</div>
+                    <div class="calendar-day">30</div>
+                    <div class="calendar-day">31</div>
+                    <div class="calendar-day"></div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; background-color: white; border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <h3 style="margin-bottom: 12px;">예정된 활동</h3>
+                
+                <div style="display: flex; align-items: center; padding: 12px; background-color: #E8E2F7; border-radius: 12px; margin-bottom: 12px;">
+                    <div style="width: 40px; height: 40px; background-color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 12px;">
+                        <span style="font-size: 20px;">🧗‍♀️</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700;">실내 암벽등반</div>
+                        <div style="font-size: 12pt; color: #666;">5월 19일 오후 2:00</div>
+                    </div>
+                    <div>
+                        <button style="background: none; border: none; color: #6B4EFF; cursor: pointer;">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; padding: 12px; background-color: #F5F5F5; border-radius: 12px;">
+                    <div style="width: 40px; height: 40px; background-color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 12px;">
+                        <span style="font-size: 20px;">🎨</span>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: 700;">도자기 클래스</div>
+                        <div style="font-size: 12pt; color: #666;">5월 21일 오전 11:00</div>
+                    </div>
+                    <div>
+                        <button style="background: none; border: none; color: #6B4EFF; cursor: pointer;">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 4. 후기 입력 영역 (팝업) -->
+        <div class="review-overlay" id="reviewOverlay">
+            <div class="review-form">
+                <button class="review-close" onclick="hideReviewForm()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h3 class="review-title">활동은 어땠나요?</h3>
+                
+                <div class="review-stars">
+                    <i class="far fa-star" onclick="selectStar(1)"></i>
+                    <i class="far fa-star" onclick="selectStar(2)"></i>
+                    <i class="far fa-star" onclick="selectStar(3)"></i>
+                    <i class="far fa-star" onclick="selectStar(4)"></i>
+                    <i class="far fa-star" onclick="selectStar(5)"></i>
+                </div>
+                
+                <div class="review-emotions">
+                    <div class="review-emotion" onclick="selectEmotion(this)">😆</div>
+                    <div class="review-emotion" onclick="selectEmotion(this)">😊</div>
+                    <div class="review-emotion" onclick="selectEmotion(this)">😐</div>
+                    <div class="review-emotion" onclick="selectEmotion(this)">😟</div>
+                </div>
+                
+                <div class="review-input">
+                    <textarea placeholder="한 줄 후기를 남겨주세요"></textarea>
+                </div>
+                
+                <button class="review-submit" onclick="submitReview()">제출하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 활동 카드 좋아요/싫어요 토글
+        function toggleLike(btn) {
+            const dislikeBtn = btn.nextElementSibling;
+            
+            if (btn.classList.contains('liked')) {
+                btn.classList.remove('liked');
+                btn.innerHTML = '<i class="far fa-heart"></i> 좋아요';
+            } else {
+                btn.classList.add('liked');
+                btn.innerHTML = '<i class="fas fa-heart"></i> 좋아요';
+                
+                // 싫어요 제거
+                if (dislikeBtn && dislikeBtn.classList.contains('disliked')) {
+                    dislikeBtn.classList.remove('disliked');
+                    dislikeBtn.innerHTML = '<i class="far fa-thumbs-down"></i> 싫어요';
+                }
+            }
+        }
+        
+        function toggleDislike(btn) {
+            const likeBtn = btn.previousElementSibling;
+            
+            if (btn.classList.contains('disliked')) {
+                btn.classList.remove('disliked');
+                btn.innerHTML = '<i class="far fa-thumbs-down"></i> 싫어요';
+            } else {
+                btn.classList.add('disliked');
+                btn.innerHTML = '<i class="fas fa-thumbs-down"></i> 싫어요';
+                
+                // 좋아요 제거
+                if (likeBtn && likeBtn.classList.contains('liked')) {
+                    likeBtn.classList.remove('liked');
+                    likeBtn.innerHTML = '<i class="far fa-heart"></i> 좋아요';
+                }
+            }
+        }
+
+        // 탭 전환
+        const tabs = document.querySelectorAll('.tab');
+        const activityList = document.getElementById('activityList');
+        const calendarView = document.getElementById('calendarView');
+        // 초기 탭 표시
+        activityList.style.display = 'block';
+        calendarView.style.display = 'none';
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const tabId = tab.getAttribute('data-tab');
+                if (tabId === 'activity-list') {
+                    activityList.style.display = 'block';
+                    calendarView.style.display = 'none';
+                } else {
+                    activityList.style.display = 'none';
+                    calendarView.style.display = 'block';
+                }
+            });
+        });
+
+        // 후기 팝업 표시/숨김
+        function showReviewForm() {
+            document.getElementById('reviewOverlay').classList.add('is-visible');
+        }
+        
+        function hideReviewForm() {
+            document.getElementById('reviewOverlay').classList.remove('is-visible');
+        }
+        
+        // 별점 선택
+        function selectStar(rating) {
+            const stars = document.querySelectorAll('.review-stars i');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('fas');
+                    star.classList.remove('far');
+                } else {
+                    star.classList.add('far');
+                    star.classList.remove('fas');
+                }
+            });
+        }
+
+        // 감정 선택
+        function selectEmotion(el) {
+            document.querySelectorAll('.review-emotion').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        // 후기 제출(예시)
+        function submitReview() {
+            hideReviewForm();
+            alert('후기가 제출되었습니다!');
+        }
+
+        // 새로고침 버튼(예시)
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            location.reload();
+        });
+        
+        function renderCalendar(year, month) {
+            const calendarDays = document.querySelector('.calendar-days');
+            calendarDays.innerHTML = '';
+
+            // 한국 시간 기준 오늘 날짜
+            const now = new Date();
+            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+            const koreaTimeDiff = 9 * 60 * 60000;
+            const today = new Date(utc + koreaTimeDiff);
+
+            const thisYear = year;
+            const thisMonth = month; // 0~11
+            const firstDay = new Date(thisYear, thisMonth, 1);
+            const lastDay = new Date(thisYear, thisMonth + 1, 0);
+
+            // 시작 요일(0:일~6:토)
+            const startDay = firstDay.getDay();
+            // 총 일수
+            const totalDays = lastDay.getDate();
+
+            // 빈칸
+            for (let i = 0; i < startDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day';
+                calendarDays.appendChild(empty);
+            }
+
+            // 날짜
+            for (let d = 1; d <= totalDays; d++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+
+                // 오늘 날짜면 today/active 클래스 추가
+                if (
+                    thisYear === today.getFullYear() &&
+                    thisMonth === today.getMonth() &&
+                    d === today.getDate()
+                ) {
+                    day.classList.add('today', 'active');
+                }
+
+                day.textContent = d;
+                calendarDays.appendChild(day);
+            }
+
+            // 마지막 빈칸
+            const remain = (startDay + totalDays) % 7;
+            if (remain !== 0) {
+                for (let i = 0; i < 7 - remain; i++) {
+                    const empty = document.createElement('div');
+                    empty.className = 'calendar-day';
+                    calendarDays.appendChild(empty);
+                }
+            }
+        }
+
+        // 페이지 로드 시 2025년 5월로 렌더링 (예시)
+        renderCalendar(2025, 4); // 4=5월
+    </script>
+</body>
+</html>
