@@ -1454,11 +1454,40 @@
       updateProgress();
     });
     goHomeBtn.addEventListener("click", function () {
-  window.location.href = "figma~.html";
+  window.location.href = "figma_wireframe.html";
 });
 
 viewStatsBtn.addEventListener("click", function () {
-  window.location.href = "specify~.html";
+  window.location.href = "specify_myself.html";
+});
+
+downloadLogBtn.addEventListener("click", function () {
+  // 다운로드할 데이터 구성
+  const logData = {
+    userInfo: responses.userInfo,
+    answers: responses.answers,
+    timestamp: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(logData, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  // 다운로드 링크 생성 및 클릭
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "성향분석_결과로그.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // 토스트 메시지 표시(선택)
+  if (toastMessage) {
+    toastMessage.innerText = "결과 로그가 다운로드되었습니다!";
+    toastMessage.style.display = "block";
+    setTimeout(() => {
+      toastMessage.style.display = "none";
+    }, 2000);
+  }
 });
   </script>
 </body>
