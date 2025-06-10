@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FindFienU – 반응형 홈</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Pretendard','Noto Sans KR',sans-serif;
+            background: #FDF8F4;
+            color: #333;
+            min-height:100vh;
+            display:flex; justify-content:center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 32px;
+            background:#fff;
+            border-radius:18px;
+            box-shadow:0 4px 24px rgba(0,0,0,0.08);
+            display:grid;
+            grid-template-rows: auto 1fr auto;
+            grid-template-columns: 1fr;
+            row-gap:32px;
+            padding-bottom:32px;
+            position:relative;
+        }
+        .header {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:24px 32px;
+            background:rgba(253,248,244,0.9);
+            border-bottom:1px solid #EEE;
+        }
+        .logo {
+            font-size:28px;
+            font-weight:bold;
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+        .logo img {
+            width:38px;
+            height:38px;
+            border-radius:10px;
+            vertical-align:middle;
+            background:#fff;
+            box-shadow:0 2px 8px rgba(140,108,195,0.07);
+        }
+        .header-icons { display:flex; gap:24px; font-size:20px; }
+        .top-cards {
+            display:grid;
+            gap:20px;
+            padding:0 32px;
+        }
+        .joy-type-card, .daily-quote {
+            padding:24px;
+            border-radius:16px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.04);
+        }
+        .joy-type-card {
+            background:#D9F0E6;
+            display:flex; justify-content:space-between; align-items:center;
+        }
+        .daily-quote {
+            background:#E8E2F7;
+            text-align:center;
+        }
+        .activities-container {
+            padding: 0 32px;      /* 위아래 패딩을 0으로 */
+            margin-top: 8px;      /* 추천 활동 제목과의 간격을 줄임 */
+            display: grid;
+            gap: 20px;
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(180px,1fr);
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+        }
+        .activity-card {
+            background:#fff;
+            border-radius:14px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.04);
+            padding:20px;
+            flex-shrink:0;
+            scroll-snap-align: start;
+            display:flex; flex-direction:column; justify-content:space-between;
+        }
+        .activity-emoji { font-size:28px; margin-bottom:10px; }
+        .activity-name { font-weight:500; margin-bottom:6px; }
+        .activity-rating { font-size:13px; color:#666; margin-bottom:10px; }
+        .book-button {
+            background:#D9F0E6; border:none;
+            border-radius:16px; padding:6px 14px;
+            font-size:13px; cursor:pointer;
+        }
+        .daily-question {
+            margin:0 32px;
+            background:#FFF8E1;
+            padding:20px; border-radius:14px;
+            display:flex; align-items:center;
+            box-shadow:0 2px 8px rgba(0,0,0,0.04);
+            cursor:pointer;
+        }
+        .question-emoji { font-size:28px; margin-right:16px; }
+        .question-content { flex:1; }
+        .question-text { font-weight:500; margin-bottom:6px; }
+        .question-hint { font-size:13px; color:#666; }
+        .bottom-nav {
+            display:flex;
+            justify-content:space-around;
+            padding:18px 0 0;
+            background:transparent;
+        }
+        .nav-item { display:flex; flex-direction:column; align-items:center; font-size:13px; cursor:pointer; }
+        .nav-icon { font-size:22px; margin-bottom:4px; }
+        .nav-text { color:#666; }
+        .active .nav-text, .active .nav-icon { color:#8C6CC3; }
+        @media (min-width: 768px) {
+            .activities-container {
+                display:grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+                overflow:visible;
+            }
+            .bottom-nav { display:none; }
+            .container { padding-bottom:40px; }
+        }
+        @media (max-width: 700px) {
+            .container {
+                max-width: 98vw;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            .header, .top-cards, .activities-container, .daily-question {
+                padding-left: 8px;
+                padding-right: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+  <div class="container">
+    <!-- 헤더 -->
+    <div class="header">
+      <div class="logo" style="display:flex; align-items:center; gap:12px;">
+        <img src="pineu_logo.png" alt="파인유 로고" style="width:38px; height:38px; border-radius:10px; vertical-align:middle; background:#fff; box-shadow:0 2px 8px rgba(140,108,195,0.07);">
+        FindFienU
+      </div>
+      <div class="header-icons">
+        <div id="refreshBtn" style="cursor:pointer;">🔄</div>
+      </div>
+    </div>
+
+    <!-- 즐거움 유형 + 오늘 문구 -->
+    <div class="top-cards">
+      <div class="joy-type-card" id="joyTypeCard" style="cursor:pointer;">
+        <div>
+          <div style="font-size:15px;color:#666;">현재 즐거움 유형</div>
+          <div class="joy-type-value" id="joyTypeValue" style="font-weight:600;font-size:16px;"><span style="color:#8C6CC3;">-</span></div>
+        </div>
+        <div style="font-size:24px;">📈</div>
+      </div>
+      <div class="daily-quote" id="goToChat" style="cursor:pointer;">
+        <div style="font-size:18px;font-weight:500;">💡오늘, 나만의 즐거움을 찾아볼까요? 🌈</div>
+        <div style="font-size:13px;color:#666;">가볍게 질문에 답하며 여정을 시작해요! ✨</div>
+      </div>
+    </div>
+
+    <!-- 추천 활동 -->
+    <div style="padding:0 32px;"><h2 style="font-size:18px;font-weight:600;">추천 활동</h2></div>
+    <div class="activities-container">
+      <div class="activity-card">
+        <div>
+          <div class="activity-emoji">🧗</div>
+          <div class="activity-name">도심 속 클라이밍</div>
+          <div class="activity-rating">⭐ 4.8</div>
+        </div>
+        <button class="book-button">예약하기</button>
+      </div>
+      <div class="activity-card">
+        <div>
+          <div class="activity-emoji">🧘</div>
+          <div class="activity-name">숲속 명상 클래스</div>
+          <div class="activity-rating">⭐ 4.6</div>
+        </div>
+        <button class="book-button">예약하기</button>
+      </div>
+      <div class="activity-card">
+        <div>
+          <div class="activity-emoji">🎨</div>
+          <div class="activity-name">추상화 그리기</div>
+          <div class="activity-rating">⭐ 4.5</div>
+        </div>
+        <button class="book-button">예약하기</button>
+      </div>
+    </div>
+
+    <!-- 오늘의 질문 -->
+    <div class="daily-question" onclick="location.href='chat-ui.html'">
+      <div class="question-emoji">💬</div>
+      <div class="question-content">
+        <div class="question-text">오늘 특별히 기억에 남는 일이 있었나요?</div>
+        <div class="question-hint">→ 클릭 시 채팅으로 이동</div>
+      </div>
+    </div>
+
+    <!-- (모바일) 하단 내비 -->
+    <div class="bottom-nav">
+      <div class="nav-item active"><div class="nav-icon">🏠</div><div class="nav-text">홈</div></div>
+      <div class="nav-item"><div class="nav-icon">🗓️</div><div class="nav-text">일정</div></div>
+      <div class="nav-item"><div class="nav-icon">💬</div><div class="nav-text">채팅</div></div>
+      <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">프로필</div></div>
+    </div>
+  </div>
+  <script>
+  // "오늘의 질문" 블럭, 즐거움 유형 카드, 오늘의 문구 블럭 클릭 시 chat-ui.html로 이동
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('.daily-question').onclick = function() {
+      location.href = 'chat-ui.html';
+    };
+    document.getElementById('joyTypeCard').onclick = function() {
+      location.href = 'chat-ui.html';
+    };
+    document.getElementById('goToChat').onclick = function() {
+      location.href = 'chat-ui.html';
+    };
+    // 새로고침 버튼
+    document.getElementById('refreshBtn').onclick = function() {
+      location.reload();
+    };
+  });
+  </script>
+</body>
+</html>
