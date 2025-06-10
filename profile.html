@@ -201,6 +201,9 @@
     } else {
       try {
         info = JSON.parse(raw);
+        // userInfo가 있으면 info를 userInfo로 치환
+        info = info.userInfo || info;
+
         document.getElementById('nickname').textContent = info.nickname || info.name || '—';
         document.getElementById('age').textContent = info.age || '—';
         document.getElementById('gender').textContent = info.gender || '—';
