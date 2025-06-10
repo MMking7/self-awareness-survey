@@ -1162,7 +1162,6 @@
       userNameSpan.innerText = responses.userInfo.name || "";
 
       // 2) “핵심 성향”을 실제 통계 기반으로 표시
-      // subtypeCounts 계산 (아래 기존 코드와 동일)
       const subtypeCounts = {};
       const sdtCounts = {
         Autonomy: 0,
@@ -1201,7 +1200,11 @@
 
       resultTypeEl.innerHTML = `성향: <strong>${mainType}</strong>`;
 
-      // (아래 기존 코드 계속)
+      // === 여기서 userInfo에 mainType 저장 ===
+      responses.userInfo.mainType = mainType;
+      // localStorage에 저장 (전체 responses를)
+      localStorage.setItem('selfAwarenessSurvey', JSON.stringify(responses));
+
       typeDescriptionEl.innerText =
         "여기에 사용자의 성향에 대한 자세한 설명이 표시됩니다.";
 
@@ -1442,7 +1445,7 @@
       showAnalysisBtn.style.display = "none";
 
       typeDescriptionEl.innerText =
-      `세부 유형을 보여드리기엔 지금 정보가 살짝 부족해요 🧐\n
+      `세부 유형을 보여드리엔 지금 정보가 살짝 부족해요 🧐\n
 아직 개발 중인 기능이기도 해요!\n
 챗봇과 얘기하면서 나에 대한 힌트를 더 모아봐요 💬🔍`;
   });    
