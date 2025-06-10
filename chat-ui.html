@@ -351,17 +351,25 @@
     <div class="header">
       <div class="header-title">Chat</div>
       <div class="header-icons">
-        <div class="header-icon" id="historyToggle">
-          <i class="fas fa-history"></i>
-        </div>
-        <div class="header-icon">
-          <i class="fas fa-cog"></i>
+        <div class="header-icon" id="backButton">
+          <i class="fas fa-arrow-left"></i>
         </div>
       </div>
     </div>
     <div class="chat-container">
       <div class="chat-bubble bot-bubble">
-        <span>💬 오늘 특별히 기억에 남는 일이 있었나요?</span>
+        <span>💬 <span id="nicknameSpan"></span>님, 오늘 특별히 기억에 남는 일이 있었나요?</span>
+        <script>
+          // 닉네임 동적 삽입
+          (function() {
+            let nickname = '';
+            try {
+              const saved = JSON.parse(localStorage.getItem('selfAwarenessSurvey'));
+              nickname = saved?.userInfo?.name || '';
+            } catch (e) {}
+            document.getElementById('nicknameSpan').textContent = nickname || '사용자';
+          })();
+        </script>
       </div>
       <div class="chat-bubble user-bubble">
         <p>오늘 오랜만에 친구를 만나서 즐거운 시간을 보냈어요. 같이 걸으면서 이야기도 많이 했고 맛있는 음식도 먹었습니다.</p>
@@ -505,19 +513,23 @@
       let nickname = '';
       try {
         const saved = JSON.parse(localStorage.getItem('selfAwarenessSurvey'));
-        // 닉네임(별명) 필드가 name, nickname, nick 등으로 저장될 수 있으니 우선순위로 찾기
-        nickname = saved?.name || saved?.별명 || '';
+        nickname = saved?.userInfo?.name;
       } catch (e) {}
 
       if (nickname) {
-        const chatContainer = document.querySelector('.chat-container');
-        // 첫 bot 메시지에 닉네임을 포함
-        const firstBotBubble = chatContainer.querySelector('.bot-bubble');
-        if (firstBotBubble) {
-          firstBotBubble.innerHTML = `<span>💬 ${nickname}님, 오늘 특별히 기억에 남는 일이 있었나요?</span>`;
-        }
+        const chatBubbles = document.querySelectorAll('.bot-bubble');
+        chatBubbles.forEach(bubble => {
+          if (bubble.textContent.includes('오늘 특별히 기억에 남는 일이 있었나요?')) {
+            bubble.innerHTML = `<span>💬 ${nickname}님, 오늘 특별히 기억에 남는 일이 있었나요?</span>`;
+          }
+        });
       }
     });
+
+    // 뒤로가기 버튼 기능
+    document.getElementById('backButton').onclick = function() {
+      window.history.back();
+    };
   </script>
 </body>
 </html>
