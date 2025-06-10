@@ -57,21 +57,39 @@
             padding:0 32px;
         }
         .joy-type-card, .daily-quote {
-            padding:24px;
+          padding: 8px 24px;    /* ↖ 상하 8px, 좌우 24px */
             border-radius:16px;
             box-shadow:0 2px 8px rgba(0,0,0,0.04);
         }
         .joy-type-card {
-            background:#D9F0E6;
-            display:flex; justify-content:space-between; align-items:center;
+            background: #D9F0E6; /* 기본 파스텔 */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            min-height: unset;
+            height: auto;
+            transition: background 0.2s;
+            box-sizing: border-box;
         }
         .daily-quote {
-            background:#E8E2F7;
-            text-align:center;
+            background: #E8E2F7; /* 기본 파스텔 */
+            text-align: center;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            min-height: unset;
+            height: auto;
+            transition: background 0.2s;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .activities-container {
-            padding: 0 32px;      /* 위아래 패딩을 0으로 */
-            margin-top: 8px;      /* 추천 활동 제목과의 간격을 줄임 */
+            padding: 0 32px;
+            margin-top: 0;      /* 추천 활동 제목과의 간격을 0으로 */
             display: grid;
             gap: 20px;
             grid-auto-flow: column;
@@ -139,6 +157,29 @@
                 padding-right: 8px;
             }
         }
+        @media (min-width: 1024px) {
+            .joy-type-card {
+                font-size: 22px;
+                padding: 32px;
+            }
+            .joy-type-card > div > div:first-child {
+                font-size: 18px !important;
+            }
+            .joy-type-value {
+                font-size: 26px !important;
+            }
+            .daily-quote {
+                font-size: 22px;
+                padding: 32px;
+            }
+            .daily-quote > div:first-child {
+                font-size: 24px !important;
+                font-weight: 600 !important;
+            }
+            .daily-quote > div:last-child {
+                font-size: 18px !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -170,32 +211,11 @@
     </div>
 
     <!-- 추천 활동 -->
-    <div style="padding:0 32px;"><h2 style="font-size:18px;font-weight:600;">추천 활동</h2></div>
-    <div class="activities-container">
-      <div class="activity-card">
-        <div>
-          <div class="activity-emoji">🧗</div>
-          <div class="activity-name">도심 속 클라이밍</div>
-          <div class="activity-rating">⭐ 4.8</div>
-        </div>
-        <button class="book-button">예약하기</button>
-      </div>
-      <div class="activity-card">
-        <div>
-          <div class="activity-emoji">🧘</div>
-          <div class="activity-name">숲속 명상 클래스</div>
-          <div class="activity-rating">⭐ 4.6</div>
-        </div>
-        <button class="book-button">예약하기</button>
-      </div>
-      <div class="activity-card">
-        <div>
-          <div class="activity-emoji">🎨</div>
-          <div class="activity-name">추상화 그리기</div>
-          <div class="activity-rating">⭐ 4.5</div>
-        </div>
-        <button class="book-button">예약하기</button>
-      </div>
+    <div style="padding:0 32px; margin-bottom:0;">
+      <h2 style="font-size:18px;font-weight:600; margin-bottom:0;">추천 활동</h2>
+    </div>
+    <div class="activities-container" id="activitiesContainer">
+      <!-- JS로 동적으로 생성 -->
     </div>
 
     <!-- 오늘의 질문 -->
@@ -216,8 +236,144 @@
     </div>
   </div>
   <script>
-  // "오늘의 질문" 블럭, 즐거움 유형 카드, 오늘의 문구 블럭 클릭 시 chat-ui.html로 이동
+  // 유형별 추천 활동 데이터
+  const activityMap = {
+    "탐험형": [
+      { emoji: "🧭", name: "미지의 골목 탐험 워킹 투어" },
+      { emoji: "🚆", name: "당일치기 기차 여행" },
+      { emoji: "🧪", name: "실험적인 신메뉴 or 이색 카페 탐방" }
+    ],
+    "창조형": [
+      { emoji: "🖌️", name: "유화나 수채화 원데이 클래스" },
+      { emoji: "✂️", name: "업사이클링 공방 체험" },
+      { emoji: "🎬", name: "단편 영상 만들기 워크숍" }
+    ],
+    "즉흥형": [
+      { emoji: "🎤", name: "오픈 마이크 참여 (즉석 노래/낭독)" },
+      { emoji: "🎭", name: "즉흥 연극 클래스" },
+      { emoji: "🧳", name: "랜덤 여행/데이트 미션 앱 사용" }
+    ],
+    "감각형": [
+      { emoji: "🌸", name: "향기 워크숍 (디퓨저/향수 만들기)" },
+      { emoji: "🧖‍♀️", name: "사운드 배스 or 요가 니드라" },
+      { emoji: "🎧", name: "고품질 헤드폰으로 ASMR 감상회" }
+    ],
+    "리듬형": [
+      { emoji: "🥁", name: "젬베 or 라틴 드럼 클래스" },
+      { emoji: "🕺", name: "리듬댄스 or 줌바 댄스 체험" },
+      { emoji: "🎧", name: "디제잉 or 믹싱 체험 프로그램" }
+    ],
+    "도전형": [
+      { emoji: "🧗‍♂️", name: "실내 클라이밍 + 루트 도전" },
+      { emoji: "🥋", name: "무술 or 자기방어 클래스" },
+      { emoji: "🧠", name: "추리 퀘스트 기반 방탈출" }
+    ],
+    "몰입형": [
+      { emoji: "🧘", name: "심화 명상 리트릿" },
+      { emoji: "🖋️", name: "글쓰기 마라톤 or 블로깅 챌린지" },
+      { emoji: "🧩", name: "수공예 퍼즐 제작 체험" }
+    ],
+    "유능성": [
+      { emoji: "🎯", name: "타겟 스포츠 (양궁, 다트)" },
+      { emoji: "🧪", name: "수치화 가능한 자기계발 (코딩/통계 해커톤)" },
+      { emoji: "📝", name: "자격증 or 인증 과정 체험" }
+    ],
+    "성장형": [
+      { emoji: "🎓", name: "인문학 or 철학 소모임" },
+      { emoji: "📈", name: "장기 목표 계획 수립 워크숍" },
+      { emoji: "📖", name: "자가독서회 + 회고 노트 작성" }
+    ],
+    "돌봄형": [
+      { emoji: "🐶", name: "유기견 산책 자원봉사" },
+      { emoji: "🧶", name: "할머니와 함께 뜨개질 클래스" },
+      { emoji: "🧑‍🍳", name: "아동 요리교실 보조 봉사" }
+    ],
+    "공유형": [
+      { emoji: "🍱", name: "도시락 나눔 캠페인 참여" },
+      { emoji: "📢", name: "책 나눔 플리마켓" },
+      { emoji: "🎙️", name: "친구와 팟캐스트 시작해보기" }
+    ],
+    "공감형": [
+      { emoji: "🎬", name: "감정 기반 영화 리뷰 나눔" },
+      { emoji: "💌", name: "감정 글쓰기 모임" },
+      { emoji: "🎭", name: "연극 관람 후 감상 공유 세션" }
+    ],
+    "관계성": [
+      { emoji: "👨‍👩‍👧‍👦", name: "가족 or 친구와 보드게임 밤" },
+      { emoji: "💃", name: "커플/듀오 댄스 클래스" },
+      { emoji: "🧑‍🤝‍🧑", name: "관계 회복 워크숍" }
+    ],
+    "연결형": [
+      { emoji: "🍻", name: "소셜 살롱 or 네트워킹 모임" },
+      { emoji: "🫶", name: "친구 생일 기획하기" },
+      { emoji: "📚", name: "북토크 or 북클럽 참여" }
+    ],
+    "사회형": [
+      { emoji: "🎈", name: "지역 축제 참여 or 서포터즈" },
+      { emoji: "🎤", name: "노래방 모임 or 댄스파티" },
+      { emoji: "🎪", name: "커뮤니티 마켓 or 플리마켓 출전" }
+    ]
+  };
+
   document.addEventListener('DOMContentLoaded', function() {
+    // 현재 즐거움 유형 표시
+    const joyTypeValue = document.getElementById('joyTypeValue');
+    let mainType = "-";
+    try {
+      const saved = JSON.parse(localStorage.getItem('selfAwarenessSurvey'));
+      mainType = saved?.mainType || saved?.joyType || saved?.type || saved?.유형 || "-";
+      if (mainType && typeof mainType === "string") {
+        joyTypeValue.innerHTML = `<span style="color:#8C6CC3;">${mainType}</span>`;
+      }
+    } catch(e) {
+      joyTypeValue.innerHTML = `<span style="color:#8C6CC3;">-</span>`;
+    }
+
+    // 추천 활동 동적 생성
+    const actCon = document.getElementById('activitiesContainer');
+    let typeKey = mainType;
+    // 여러 유형이 있을 경우 첫 번째만 사용
+    if (typeKey && typeof typeKey === "string" && typeKey.includes("+")) {
+      typeKey = typeKey.split("+")[0].trim();
+    }
+    if (activityMap[typeKey]) {
+      actCon.innerHTML = activityMap[typeKey].map(act => `
+        <div class="activity-card">
+          <div>
+            <div class="activity-emoji">${act.emoji}</div>
+            <div class="activity-name">${act.name}</div>
+          </div>
+          <button class="book-button">도전해볼래요!</button>
+        </div>
+      `).join('');
+    } else {
+      // 디폴트 추천: 독서, 걷기/러닝, 명상
+      const defaultActs = [
+        { emoji: "📖", name: "독서와 북노트 쓰기" },
+        { emoji: "🚶‍♂️", name: "가벼운 걷기나 러닝" },
+        { emoji: "🧘", name: "명상하기" }
+      ];
+      actCon.innerHTML = defaultActs.map(act => `
+        <div class="activity-card">
+          <div>
+            <div class="activity-emoji">${act.emoji}</div>
+            <div class="activity-name">${act.name}</div>
+          </div>
+          <button class="book-button">도전해볼래요!</button>
+        </div>
+      `).join('');
+    }
+
+    // 활동 버튼 클릭 시 안내
+    setTimeout(() => {
+      document.querySelectorAll('.book-button').forEach(btn => {
+        btn.onclick = function() {
+          alert('아직 개발 예정입니다.');
+        };
+      });
+    }, 10);
+
+    // 기존 클릭 이동 기능
     document.querySelector('.daily-question').onclick = function() {
       location.href = 'chat-ui.html';
     };
@@ -232,6 +388,6 @@
       location.reload();
     };
   });
-  </script>
+</script>
 </body>
 </html>
