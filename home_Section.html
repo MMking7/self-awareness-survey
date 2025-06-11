@@ -205,6 +205,9 @@
       </div>
       <div class="header-icons">
         <div id="refreshBtn" style="cursor:pointer;">🔄</div>
+        <button id="calendarBtn" class="calendar-btn" style="display:none; margin-left:12px; background:#E8E2F7; border:none; border-radius:10px; padding:6px 18px; font-size:15px; font-weight:500; color:#8C6CC3; cursor:pointer;">
+          🗓️ 일정
+        </button>
       </div>
     </div>
 
@@ -243,8 +246,8 @@
     <!-- (모바일) 하단 내비 -->
     <div class="bottom-nav">
       <div class="nav-item active"><div class="nav-icon">🏠</div><div class="nav-text">홈</div></div>
-      <div class="nav-item"><div class="nav-icon">🗓️</div><div class="nav-text">일정</div></div>
-      <div class="nav-item"><div class="nav-icon">💬</div><div class="nav-text">채팅</div></div>
+      <div class="nav-item" id="bottomCalendarBtn"><div class="nav-icon">🗓️</div><div class="nav-text">일정</div></div>
+      <div class="nav-item" id="bottomChatBtn"><div class="nav-icon">💬</div><div class="nav-text">채팅</div></div>
       <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-text">프로필</div></div>
     </div>
   </div>
@@ -308,7 +311,7 @@
     ],
     "돌봄형": [
       { emoji: "🐶", name: "유기견 산책 자원봉사" },
-      { emoji: "🧶", name: "뜨개질 클래스" },
+      { emoji: "🧶", name: "할머니와 함께 뜨개질 클래스" },
       { emoji: "🧑‍🍳", name: "아동 요리교실 보조 봉사" }
     ],
     "공유형": [
@@ -452,16 +455,6 @@ const typeDescriptionMap ={
   } catch(e) {
     joyTypeValue.innerHTML = `<span style="color:#8C6CC3;">-</span>`;
   }
-// 닉네임 불러와서 추천활동 타이틀에 반영
-let nickname = "-";
-try {
-  const info = JSON.parse(localStorage.getItem('Maininfo'));
-  nickname = info?.name || "-";
-} catch(e) {}
-const titleEl = document.getElementById('recommendTitle');
-if (titleEl && nickname && nickname !== "-") {
-  titleEl.textContent = `${nickname}님의 추천 활동`;
-}
 
     // 추천 활동 동적 생성
     const actCon = document.getElementById('activitiesContainer');
@@ -500,6 +493,19 @@ if (titleEl && nickname && nickname !== "-") {
         </div>
       `).join('');
     }
+    // 사용자 닉네임 가져오기
+    let nickname = "-";
+    try {
+      const saved = JSON.parse(localStorage.getItem('selfAwarenessSurvey'));
+      nickname = saved?.userInfo?.name || "-";
+      console.log('닉네임:', nickname); // 콘솔 확인
+    } catch(e) {
+      console.error('닉네임 로드 실패:', e);
+    }
+    const titleEl = document.getElementById('recommendTitle');
+    if (titleEl && nickname && nickname !== "-") {
+      titleEl.textContent = `${nickname}님의 추천 활동`;
+    }
 
     // 활동 버튼 클릭 시 안내
     setTimeout(() => {
@@ -512,6 +518,11 @@ if (titleEl && nickname && nickname !== "-") {
 
     // 기존 클릭 이동 기능
     document.querySelector('.daily-question').onclick = function() {
+      location.href = 'chat-ui.html';
+    };
+    // 아래 코드에서 'bottomChatBtn' 앞에 #이 빠져있어서 동작하지 않습니다.
+    // 수정: document.getElementById('bottomChatBtn')
+    document.getElementById('bottomChatBtn').onclick = function() {
       location.href = 'chat-ui.html';
     };
     document.getElementById('joyTypeCard').onclick = function() {
@@ -543,6 +554,14 @@ if (titleEl && nickname && nickname !== "-") {
     document.getElementById('typeDescModal').onclick = function(e) {
       if (e.target === this) this.style.display = "none";
     };
+    // PC버전 일정 버튼 클릭 시 calender.html로 이동
+    document.getElementById('calendarBtn').onclick = function() {
+      location.href = 'calender.html';
+    };
+    // 하단 내비 '일정' 버튼 클릭 시 calender.html로 이동
+    document.getElementById('bottomCalendarBtn').onclick = function() {
+      location.href = 'calender.html';
+    };
     // 하단 내비 '프로필' 버튼 클릭 시 profile.html로 이동
     document.querySelectorAll('.bottom-nav .nav-item').forEach(function(item) {
       const text = item.querySelector('.nav-text')?.textContent?.trim();
@@ -554,5 +573,17 @@ if (titleEl && nickname && nickname !== "-") {
     });
   });
 </script>
+<style>
+    @media (min-width: 768px) {
+      .calendar-btn {
+        display: inline-block !important;
+      }
+    }
+    @media (max-width: 767px) {
+      .calendar-btn {
+        display: none !important;
+      }
+    }
+  </style>
 </body>
 </html>
