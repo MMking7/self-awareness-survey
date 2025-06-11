@@ -225,7 +225,7 @@
 
     <!-- 추천 활동 -->
     <div style="padding:0 32px; margin-bottom:0;">
-      <h2 style="font-size:18px;font-weight:600; margin-bottom:0;">추천 활동</h2>
+      <h2 id="recommendTitle" style="font-size:18px;font-weight:600; margin-bottom:0;">추천 활동</h2>
     </div>
     <div class="activities-container" id="activitiesContainer">
       <!-- JS로 동적으로 생성 -->
@@ -452,6 +452,16 @@ const typeDescriptionMap ={
   } catch(e) {
     joyTypeValue.innerHTML = `<span style="color:#8C6CC3;">-</span>`;
   }
+// 닉네임 불러와서 추천활동 타이틀에 반영
+let nickname = "-";
+try {
+  const info = JSON.parse(localStorage.getItem('Maininfo'));
+  nickname = info?.name || "-";
+} catch(e) {}
+const titleEl = document.getElementById('recommendTitle');
+if (titleEl && nickname && nickname !== "-") {
+  titleEl.textContent = `${nickname}님의 추천 활동`;
+}
 
     // 추천 활동 동적 생성
     const actCon = document.getElementById('activitiesContainer');
