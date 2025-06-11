@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>채팅 화면 UI 와이어프레임</title>
+  <title>채팅 화면</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
     :root {
@@ -129,6 +129,8 @@
     .text-input-wrap {
       position: relative;
       margin-bottom: 12px;
+      width: 100%;
+      box-sizing: border-box;
     }
     .text-input {
       width: 100%;
@@ -139,6 +141,7 @@
       outline: none;
       background-color: var(--bg-input);
       transition: background 0.3s;
+      box-sizing: border-box;
     }
     .send-button {
       position: absolute;
@@ -215,60 +218,6 @@
       cursor: pointer;
       font-size: 20px;
       transition: background 0.3s, color 0.3s;
-    }
-    /* 히스토리 탭 */
-    .history-tab {
-      border-top: 1px solid #eee;
-      background-color: #fff;
-      overflow: hidden;
-      max-height: 0;
-      transition: max-height 0.3s ease;
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      z-index: 100;
-    }
-    .history-tab.active {
-      max-height: 300px;
-      overflow-y: auto;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-    }
-    .history-header {
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px dashed #ddd;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .date-item {
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #f5f5f5;
-      color: #555;
-      font-size: 13px;
-    }
-    .cloud-icon {
-      color: var(--color-cloud);
-      cursor: pointer;
-    }
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0,0,0,0.4);
-      z-index: 90;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .overlay.active {
-      opacity: 1;
-      pointer-events: auto;
     }
     /* 반응형 */
     @media (max-width: 600px) {
@@ -347,189 +296,143 @@
   </style>
 </head>
 <body>
-  <div class="iphone-container">
-    <div class="header">
-      <div class="header-title">Chat</div>
-      <div class="header-icons">
-        <div class="header-icon" id="backButton">
-          <i class="fas fa-arrow-left"></i>
-        </div>
-      </div>
-    </div>
-    <div class="chat-container">
-      <div class="chat-bubble bot-bubble">
-        <span>💬 <span id="nicknameSpan"></span>님, 오늘 특별히 기억에 남는 일이 있었나요?</span>
-        <script>
-          // 닉네임 동적 삽입
-          (function() {
-            let nickname = '';
-            try {
-              const saved = JSON.parse(localStorage.getItem('selfAwarenessSurvey'));
-              nickname = saved?.userInfo?.name || '';
-            } catch (e) {}
-            document.getElementById('nicknameSpan').textContent = nickname || '사용자';
-          })();
-        </script>
-      </div>
-      <div class="chat-bubble user-bubble">
-        <p>오늘 오랜만에 친구를 만나서 즐거운 시간을 보냈어요. 같이 걸으면서 이야기도 많이 했고 맛있는 음식도 먹었습니다.</p>
-        <div class="tags-container">
-          <div class="tag happy">
-            <span>😄</span>
-            <span>#즐거움</span>
-          </div>
-          <div class="tag happy">
-            <span>👫</span>
-            <span>#만남</span>
+    <div class="iphone-container">
+      <div class="header">
+        <div class="header-title">Chat</div>
+        <div class="header-icons">
+          <div class="header-icon" id="backButton">
+            <i class="fas fa-arrow-left"></i>
           </div>
         </div>
       </div>
-      <div class="chat-bubble bot-bubble">
-        <span>🤔 최근 했던 활동 중 가장 재미있었던 건 무엇인가요?</span>
+      <div class="chat-container" id="chatContainer">
+        <div class="chat-bubble bot-bubble" id="firstBotBubble">
+          <span>💬 <span id="nicknameSpan"></span>님, 오늘 특별히 기억에 남는 일이 있었나요?</span>
+        </div>
+        <div class="chat-bubble user-bubble">
+          <p>오늘 오랜만에 친구를 만나서 즐거운 시간을 보냈어요. 같이 걸으면서 이야기도 많이 했고 맛있는 음식도 먹었습니다.</p>
+          <div class="tags-container">
+            <div class="tag happy">
+              <span>😄</span>
+              <span>#즐거움</span>
+            </div>
+            <div class="tag happy">
+              <span>👫</span>
+              <span>#만남</span>
+            </div>
+          </div>
+        </div>
+        <div class="chat-bubble bot-bubble">
+          <span>🤔 최근 했던 활동 중 가장 재미있었던 건 무엇인가요?</span>
+        </div>
+      </div>
+      <div class="input-container">
+        <div class="text-input-wrap">
+          <input type="text" class="text-input" placeholder="답변을 입력하세요...">
+          <button class="send-button">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
+        <div class="options-container">
+          <button class="option-button option-happy">
+            <span>😆</span>
+            <span>즐거웠어요</span>
+          </button>
+          <button class="option-button option-challenge">
+            <span>🤯</span>
+            <span>도전이었어요</span>
+          </button>
+          <button class="option-button option-neutral">
+            <span>😐</span>
+            <span>그냥 그랬어요</span>
+          </button>
+        </div>
+      </div>
+      <div class="home-indicator">
+        <div class="indicator"></div>
       </div>
     </div>
-    <div class="overlay" id="overlay"></div>
-    <div class="history-tab" id="historyTab">
-      <div class="history-header">
-        <span>대화 히스토리</span>
-        <i class="fas fa-chevron-down"></i>
-      </div>
-      <div class="date-item">
-        <span>2025년 5월 18일</span>
-        <span class="cloud-icon"><i class="fas fa-cloud"></i></span>
-      </div>
-      <div class="date-item">
-        <span>2025년 5월 15일</span>
-        <span class="cloud-icon"><i class="fas fa-cloud"></i></span>
-      </div>
-      <div class="date-item">
-        <span>2025년 5월 10일</span>
-        <span class="cloud-icon"><i class="fas fa-cloud"></i></span>
-      </div>
+    <div class="dark-toggle" id="darkToggle">
+      <i class="fas fa-moon"></i>
     </div>
-    <div class="input-container">
-      <div class="text-input-wrap">
-        <input type="text" class="text-input" placeholder="답변을 입력하세요...">
-        <button class="send-button">
-          <i class="fas fa-paper-plane"></i>
-        </button>
-      </div>
-      <div class="options-container">
-        <button class="option-button option-happy">
-          <span>😆</span>
-          <span>즐거웠어요</span>
-        </button>
-        <button class="option-button option-challenge">
-          <span>🤯</span>
-          <span>도전이었어요</span>
-        </button>
-        <button class="option-button option-neutral">
-          <span>😐</span>
-          <span>그냥 그랬어요</span>
-        </button>
-      </div>
-    </div>
-    <div class="home-indicator">
-      <div class="indicator"></div>
-    </div>
-  </div>
-  <div class="dark-toggle" id="darkToggle">
-    <i class="fas fa-moon"></i>
-  </div>
-  <script>
-    // 히스토리 탭 토글 기능
-    const historyToggle = document.getElementById('historyToggle');
-    const historyTab = document.getElementById('historyTab');
-    const overlay = document.getElementById('overlay');
-    const chatContainer = document.querySelector('.chat-container');
-    const optionButtons = document.querySelectorAll('.option-button');
-    const textInput = document.querySelector('.text-input');
-    const sendButton = document.querySelector('.send-button');
-    const darkToggle = document.getElementById('darkToggle');
+    <script>
+      const chatContainer = document.getElementById('chatContainer');
+      const optionButtons = document.querySelectorAll('.option-button');
+      const textInput = document.querySelector('.text-input');
+      const sendButton = document.querySelector('.send-button');
+      const darkToggle = document.getElementById('darkToggle');
+      const backButton = document.getElementById('backButton');
 
-    historyToggle.addEventListener('click', () => {
-      historyTab.classList.toggle('active');
-      overlay.classList.toggle('active');
-    });
-
-    overlay.addEventListener('click', () => {
-      historyTab.classList.remove('active');
-      overlay.classList.remove('active');
-    });
-
-    // 선택지 버튼 클릭 이벤트
-    optionButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        textInput.value = button.textContent.trim();
-        textInput.focus();
-      });
-    });
-
-    // 메시지 전송 함수
-    function sendMessage() {
-      if (textInput.value.trim() !== '') {
-        // 유저 말풍선 생성
-        const userBubble = document.createElement('div');
-        userBubble.className = 'chat-bubble user-bubble';
-        userBubble.innerHTML = `<p>${textInput.value}</p>`;
-        chatContainer.appendChild(userBubble);
-
-        // 입력창 비우기
-        textInput.value = '';
-
-        // 스크롤을 맨 아래로 이동
-        setTimeout(() => {
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 10);
-      }
-    }
-
-    // 전송 버튼 이벤트
-    sendButton.addEventListener('click', sendMessage);
-
-    // 엔터 키 이벤트 처리
-    textInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter' && textInput.value.trim() !== '') {
-        sendMessage();
-      }
-    });
-
-    // 다크모드 토글
-    darkToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      // 아이콘 변경
-      const icon = darkToggle.querySelector('i');
-      if (document.body.classList.contains('dark-mode')) {
-        icon.classList.remove('fa-moon');
-        icon.classList.add('fa-sun');
-      } else {
-        icon.classList.remove('fa-sun');
-        icon.classList.add('fa-moon');
-      }
-    });
-
-    // 첫 메시지에 닉네임을 불러서 인사
-    window.addEventListener('DOMContentLoaded', () => {
-      let nickname = '';
-      try {
-        const saved = JSON.parse(localStorage.getItem('selfAwarenessSurvey'));
-        nickname = saved?.userInfo?.name;
-      } catch (e) {}
-
-      if (nickname) {
-        const chatBubbles = document.querySelectorAll('.bot-bubble');
-        chatBubbles.forEach(bubble => {
-          if (bubble.textContent.includes('오늘 특별히 기억에 남는 일이 있었나요?')) {
-            bubble.innerHTML = `<span>💬 ${nickname}님, 오늘 특별히 기억에 남는 일이 있었나요?</span>`;
-          }
+      // 선택지 버튼 클릭 이벤트
+      optionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          textInput.value = button.textContent.trim();
+          textInput.focus();
         });
-      }
-    });
+      });
 
-    // 뒤로가기 버튼 기능
-    document.getElementById('backButton').onclick = function() {
-      window.location.href = 'home_Section.html';
-    };
-  </script>
-</body>
-</html>
+      // 메시지 전송 함수
+      function sendMessage() {
+        if (textInput.value.trim() !== '') {
+          // 유저 말풍선 생성
+          const userBubble = document.createElement('div');
+          userBubble.className = 'chat-bubble user-bubble';
+          userBubble.innerHTML = `<p>${textInput.value}</p>`;
+          chatContainer.appendChild(userBubble);
+
+          // 입력창 비우기
+          textInput.value = '';
+
+          // 스크롤을 맨 아래로 이동
+          setTimeout(() => {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          }, 10);
+        }
+      }
+
+      // 전송 버튼 이벤트
+      sendButton.addEventListener('click', sendMessage);
+
+      // 엔터 키 이벤트 처리
+      textInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && textInput.value.trim() !== '') {
+          sendMessage();
+        }
+      });
+
+      // 다크모드 토글
+      darkToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        // 아이콘 변경
+        const icon = darkToggle.querySelector('i');
+        if (document.body.classList.contains('dark-mode')) {
+          icon.classList.remove('fa-moon');
+          icon.classList.add('fa-sun');
+        } else {
+          icon.classList.remove('fa-sun');
+          icon.classList.add('fa-moon');
+        }
+      });
+
+      // 첫 메시지에 닉네임을 불러서 인사
+      window.addEventListener('DOMContentLoaded', () => {
+        let nickname = '';
+        try {
+          const saved = JSON.parse(localStorage.getItem('selfAwarenessSurvey'));
+          nickname = saved?.userInfo?.name;
+        } catch (e) {}
+
+        document.getElementById('nicknameSpan').textContent = nickname || '사용자';
+
+        // 뒤로가기 버튼 기능 (DOMContentLoaded 안에서!)
+        const backButton = document.getElementById('backButton');
+        if (backButton) {
+          backButton.onclick = function() {
+            window.location.href = 'home_Section.html';
+          };
+        }
+      });
+    </script>
+  </body>
+
+</html></html>
