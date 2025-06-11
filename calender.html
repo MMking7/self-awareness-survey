@@ -212,6 +212,13 @@
             cursor: pointer;
             transition: all 0.3s ease;
             border-left: 3px solid #8C6CC3;
+            /* 추천 활동이 가로로 나오도록 강제 */
+            white-space: normal !important;
+            writing-mode: horizontal-tb !important;
+            word-break: keep-all;
+            flex-direction: row !important;
+            display: flex;
+            align-items: center;
         }
 
         .activity-item:hover {
@@ -353,6 +360,15 @@
             .day-cell {
                 min-height: 60px;
                 padding: 2px;
+            }
+
+            .activity-item .activity-rating {
+                display: none !important;
+            }
+            .activity-item {
+                font-size: 0.65rem;
+                flex-wrap: nowrap;
+                white-space: nowrap;
             }
 
             .activity-item {
